@@ -1,0 +1,305 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <meta charset=utf-8 />
+    <title>Reading pad</title>
+    <style>
+        #timer {
+            text-align: center;
+            font-size: 30px;
+            margin: 0px;
+        }
+
+        textarea {
+            width: 70%;
+            height: 400px;
+            margin: 5px auto;
+            display: block;
+        }
+
+        #hour,
+        #minute {
+            width: 50px;
+            font-size: 30px;
+        }
+
+        #inputTime {
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        #inputTimeContainer {
+            align-items: center;
+        }
+
+        .btn-info {
+            display: inline-block;
+            margin: 5px;
+            width: 100px;
+        }
+
+        .fa-copy {
+            font-size: 30px;
+            color: white;
+            margin: 5px;
+        }
+
+        body {
+            background-color: black;
+            background-image: url('writing.jpg');
+            color: white;
+        }
+
+
+        html,
+        body,
+        .Container {
+            height: 100%;
+        }
+
+        .Container:before {
+            content: '';
+            height: 100%;
+            float: left;
+        }
+
+        .Header {
+            padding: 10px;
+            background-color: #333333;
+        }
+
+        .Content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .Content:after {
+            content: '';
+            clear: both;
+            display: block;
+        }
+
+        .Wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .Wrapper>div {
+            height: 100%;
+        }
+
+        .LeftContent {
+            border-style: solid;
+            border-color: white;
+            width: 50%;
+            padding: 10px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+
+        .RightContent {
+            float: right;
+            width: 48%;
+            padding: 10px;
+            overflow: auto;
+            margin-left: 10px;
+            white-space: pre-wrap;
+        }
+
+        hr {
+            border-top: 1px solid #fff;
+        }
+
+        .answerBox {
+            margin: 0px 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+
+    <div class="Container">
+        <div class="Header">
+            <div id="inputTimeContainer">
+                <div id="inputTime">
+                    <input type="text" maxlength="2" id="hour" value="00">
+                    <div>:</div>
+                    <input type="text" maxlength="2" id="minute" value="20">
+                </div>
+                <div id="buttons">
+                    <button class="btn btn-info" onclick="start()">Start</button>
+                </div>
+            </div>
+            <div id="timerContainer" style="display: none;">
+                <p id="timer"></p>
+                <div id="buttons">
+                    <button class="btn btn-info" onclick="start()">Start</button>
+                    <button class="btn btn-info" onclick="stop()">Stop</button>
+                </div>
+            </div>
+        </div>
+        <div class="Content">
+            <textarea id="text" rows="1000"></textarea>
+            <div class="Wrapper" style="display: none;">
+                <div class="RightContent"> </div>
+                <div class="LeftContent"> </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        // Set the date we're counting down to
+        var countDownDate = new Date().getTime();
+        var stopped = false;
+        var days, hours, minutes, seconds;
+
+        function start() {
+            var hourVal = stopped ? hours : parseInt($('#hour').val());
+            var minuteVal = stopped ? minutes : parseInt($('#minute').val());
+            var secondVal = stopped ? seconds : 1;
+            countDownDate = new Date().getTime() + hourVal * 60 * 60 * 1000 + minuteVal * 60 * 1000 + secondVal * 1000;
+            stopped = false;
+            $("#inputTimeContainer").hide();
+            $("#timerContainer").show();
+            generateQuestion();
+            $("#text").hide();
+            $(".Wrapper").show();
+
+            setInterval(function () {
+                if (stopped) {
+                    return;
+                }
+
+                // Get today's date and time
+                var now = new Date().getTime();
+
+                // Find the distance between now and the count down date
+                var distance = Math.max(countDownDate) - Math.max(now);
+
+                // console.log(countDownDate);
+
+                // Time calculations for days, hours, minutes and seconds
+                if (now > countDownDate) {
+                    days = Math.ceil(distance / (1000 * 60 * 60 * 24));
+                    hours = Math.ceil((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    minutes = Math.ceil((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+                }
+                else {
+                    days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                }
+
+                // Output the result in an element with id="timer"
+                var timestring = timeformat(hours) + ":" + timeformat(minutes) + ":" + timeformat(seconds);
+                if (now > countDownDate) {
+                    document.getElementById("timer").style.color = "red";
+                    timestring = "-" + timestring;
+                }
+                document.getElementById("timer").innerHTML = timestring;
+
+                // // If the count down is over, write some text 
+                // if (distance < 0) {
+                //     clearInterval(x);
+                //     document.getElementById("timer").innerHTML = "EXPIRED";
+                // }
+            }, 1000);
+
+        }
+
+        var answerBoxFormat = '<div id="answer{index}"><label>{questionNo}</label><input class="answerBox" type="text"></div><br>';
+
+        function generateQuestion() {
+            var text = $("#text").val();
+            var array = text.split("\nQuestions ");
+            $(".LeftContent").text(array[0]);
+            for (var i = 1; i < array.length; i++) {
+                var questionNos = array[i].split("\n\n")[0];
+                var start = parseInt(questionNos.split("-")[0]);
+                var end = parseInt(questionNos.split("-")[1]);
+                var questionText = array[i];
+                if (array[i].split("Answer:").length > 1) {
+                    processAnswer(array[i].split("Answer:")[1]);
+                    questionText = array[i].split("Answer:")[0];
+                    questionText = questionText.replaceAll("\n.\n", "");
+                }
+                $('.RightContent').append("Questions " + questionText + "<br>");
+                for (var j = start; j <= end; j++) {
+                    $('.RightContent').append(
+                        answerBoxFormat.replace("{questionNo}", j)
+                            .replace("{index}", j)
+                    );
+                }
+                $('.RightContent').append("<hr><br>");
+            }
+            $('.RightContent').append('<button class="btn btn-success" onclick="showAnswer()">Show Answer</button>');
+        }
+
+        var answers = [];
+        var answerIndex = [];
+
+        function processAnswer(answerText) {
+            var array = answerText.split("\n");
+            console.log(array);
+
+            for (var i = 0; i < array.length; i++) {
+                if (array[i] == '') {
+                    continue;
+                }
+                answerIndex.push(array[i].split(". ")[0]);
+                var answer = array[i].split(". ")[1];
+                answers.push(answer);
+            }
+            console.log(answers);
+        }
+
+        function showAnswer() {
+            for (var i = 0; i < answers.length; i++) {
+                // console.log($('#answer' + answerIndex[i]));
+                $('#answer' + answerIndex[i]).append('<span style="color:red;">' + answers[i] + '</span>');
+            }
+            stop();
+        }
+
+        function timeformat(num) {
+            if (num < 0) {
+                num *= -1;
+            }
+            if (num < 10) {
+                return "0" + num;
+            }
+            return num;
+        }
+
+        function stop() {
+            stopped = true;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <meta charset=utf-8 />
+    <title>Writing pad</title>
+    <style>
+        #timer {
+            text-align: center;
+            font-size: 30px;
+            margin: 0px;
+        }
+
+        textarea {
+            width: 70%;
+            height: 400px;
+            margin: 5px auto;
+            display: block;
+        }
+
+        #hour,
+        #minute {
+            width: 50px;
+            font-size: 30px;
+        }
+
+        #inputTime {
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        #inputTimeContainer {
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 5px;
+            width: 100px;
+        }
+
+        .fa-copy {
+            font-size: 30px;
+            color: white;
+            margin: 5px;
+        }
+
+        body {
+            margin: 10px;
+            background-color: black;
+            background-image: url('writing.jpg');
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <div id="inputTimeContainer">
+        <div id="inputTime">
+            <input type="text" maxlength="2" id="hour" value="00">
+            <div>:</div>
+            <input type="text" maxlength="2" id="minute" value="00">
+        </div>
+        <div id="buttons">
+            <button class="btn btn-info" onclick="start()">Start</button>
+        </div>
+    </div>
+    <div id="timerContainer" style="display: none;">
+        <p id="timer"></p>
+        <div id="buttons">
+            <button class="btn btn-info" onclick="start()">Start</button>
+            <button class="btn btn-info" onclick="stop()">Stop</button>
+            <i class="fa fa-copy" onclick="copyText()"></i>
+        </div>
+    </div>
+    <center>
+        <p id="wordCount">0 word(s)</p>
+    </center>
+    <textarea id="text" rows="1000"></textarea>
+
+    <script>
+        $(document).ready(function () {
+            var wordCount = 0;
+
+            $('#text').bind('input propertychange keydown', function () {
+                if ((this.value.match(/\S+/g)) != null) {
+                    wordCount = this.value.match(/\S+/g).length;
+                }
+                else {
+                    wordCount = 0;
+                }
+                // console.log(wordCount);
+                $('#wordCount').text(wordCount + " word(s)");
+            });
+        });
+
+        // Set the date we're counting down to
+        var countDownDate = new Date().getTime();
+        var stopped = false;
+        var days, hours, minutes, seconds;
+
+        function start() {
+            var hourVal = stopped ? hours : parseInt($('#hour').val());
+            var minuteVal = stopped ? minutes : parseInt($('#minute').val());
+            var secondVal = stopped ? seconds : 1;
+            countDownDate = new Date().getTime() + hourVal * 60 * 60 * 1000 + minuteVal * 60 * 1000 + secondVal * 1000;
+            stopped = false;
+            $("#inputTimeContainer").hide();
+            $("#timerContainer").show();
+            setInterval(function () {
+                if (stopped) {
+                    return;
+                }
+
+                // Get today's date and time
+                var now = new Date().getTime();
+
+                // Find the distance between now and the count down date
+                var distance = Math.max(countDownDate) - Math.max(now);
+
+                console.log(countDownDate);
+
+                // Time calculations for days, hours, minutes and seconds
+                if (now > countDownDate) {
+                    days = Math.ceil(distance / (1000 * 60 * 60 * 24));
+                    hours = Math.ceil((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    minutes = Math.ceil((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+                }
+                else {
+                    days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                }
+
+                // Output the result in an element with id="timer"
+                var timestring = timeformat(hours) + ":" + timeformat(minutes) + ":" + timeformat(seconds);
+                if (now > countDownDate) {
+                    document.getElementById("timer").style.color = "red";
+                    timestring = "-" + timestring;
+                }
+                document.getElementById("timer").innerHTML = timestring;
+
+                // // If the count down is over, write some text 
+                // if (distance < 0) {
+                //     clearInterval(x);
+                //     document.getElementById("timer").innerHTML = "EXPIRED";
+                // }
+            }, 1000);
+
+        }
+
+        function timeformat(num) {
+            if (num < 0) {
+                num *= -1;
+            }
+            if (num < 10) {
+                return "0" + num;
+            }
+            return num;
+        }
+
+        function stop() {
+            stopped = true;
+        }
+
+        function copyText() {
+            /* Get the text field */
+            var copyText = document.getElementById("text");
+
+            /* Select the text field */
+            copyText.select();
+            document.execCommand('copy');
+
+            /* Alert the copied text */
+            alert("Copied the text");
+        }
+
+
+    </script>
+
+</body>
+
+</html>
