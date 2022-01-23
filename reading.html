@@ -181,12 +181,16 @@
             var minuteVal = stopped ? minutes : parseInt($('#minute').val());
             var secondVal = stopped ? seconds : 1;
             countDownDate = new Date().getTime() + hourVal * 60 * 60 * 1000 + minuteVal * 60 * 1000 + secondVal * 1000;
+
+            if (!stopped) {
+                $("#inputTimeContainer").hide();
+                $("#timerContainer").show();
+                generateQuestion();
+                $("#text").hide();
+                $(".Wrapper").show();
+            }
+            
             stopped = false;
-            $("#inputTimeContainer").hide();
-            $("#timerContainer").show();
-            generateQuestion();
-            $("#text").hide();
-            $(".Wrapper").show();
 
             setInterval(function () {
                 if (stopped) {
